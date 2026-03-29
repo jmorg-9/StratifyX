@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchDashboard, runSimulation } from "./lib/api";
+import { addWatchlistTicker, fetchDashboard, removeWatchlistTicker, runSimulation } from "./lib/api";
 import type { DashboardResponse, JournalEntry, SimulationResponse, TradeIdea } from "./types";
 
 type AppPage = "scanner" | "simulation" | "journal";
@@ -247,7 +247,7 @@ function ScannerPage({
               <span key={ticker} className="watchlist-pill">
                 <span>{ticker}</span>
                 <button type="button" aria-label={`Remove ${ticker}`} onClick={() => onRemoveTicker(ticker)}>
-                  ×
+                  x
                 </button>
               </span>
             ))}
@@ -559,19 +559,30 @@ export default function App() {
     void simulate();
   }, [selectedTradeIdea, riskAmount]);
 
-  function handleAddTicker() {
+  async function handleAddTicker() {
     const ticker = watchlistDraft.trim().toUpperCase();
     if (!ticker || watchlist.includes(ticker)) {
       setWatchlistDraft("");
       return;
     }
 
-    setWatchlist((current) => [...current, ticker]);
+    try {
+      const response = await addWatchlistTicker(ticker);
+      setWatchlist(response.symbols);
+    } catch {
+      setWatchlist((current) => [...current, ticker]);
+    }
+
     setWatchlistDraft("");
   }
 
-  function handleRemoveTicker(ticker: string) {
-    setWatchlist((current) => current.filter((currentTicker) => currentTicker !== ticker));
+  async function handleRemoveTicker(ticker: string) {
+    try {
+      const response = await removeWatchlistTicker(ticker);
+      setWatchlist(response.symbols);
+    } catch {
+      setWatchlist((current) => current.filter((currentTicker) => currentTicker !== ticker));
+    }
   }
 
   if (loading) {

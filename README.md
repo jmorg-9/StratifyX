@@ -4,13 +4,14 @@ StratifyX is a trading dashboard for scanning stock tickers, detecting rule-base
 
 ## Current Status
 
-The repository currently contains a runnable Phase 1 foundation:
+The repository currently contains a runnable Phase 1 foundation plus the first Phase 2 database slice:
 
 - React dashboard
 - Fastify API
 - PostgreSQL schema
 - rule-based setup detection for five user-defined setups
 - mock market/event data so the app can run locally without a paid data feed
+- optional local PostgreSQL integration for watchlist and journal reads/writes
 
 This is not yet the full production feature set. It is a working scaffold that demonstrates the main app flow end to end.
 
@@ -55,7 +56,7 @@ docs/     Architecture, trading logic, and progress notes
 
 - Node.js 20+
 - npm 10+
-- PostgreSQL if you want to use the schema outside the current demo flow
+- PostgreSQL only if you want the Phase 2 local database features
 
 ## Install
 
@@ -73,6 +74,37 @@ This starts:
 
 - API: `http://localhost:3001`
 - Web: `http://localhost:5173`
+
+If `DATABASE_URL` is not configured, the app falls back to fixture data.
+
+## Local Database Setup
+
+Nothing in this repo deploys or hosts PostgreSQL for you. The app only connects to the database instance you explicitly point it at with `DATABASE_URL`.
+
+Recommended local-only setup:
+
+1. Install PostgreSQL locally on your machine.
+2. Create a database named `stratifyx`.
+3. Copy `.env.example` to `.env`.
+4. Set `DATABASE_URL` to your local instance, for example:
+
+```bash
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/stratifyx
+```
+
+5. Apply the schema:
+
+```bash
+npm run db:init
+```
+
+6. Optionally apply the seed file:
+
+```bash
+npm run db:seed
+```
+
+If you do not run PostgreSQL locally, the app still runs, but watchlist persistence and DB-backed journal reads will fall back to fixture behavior.
 
 ## Verify
 
@@ -96,12 +128,13 @@ The initial PostgreSQL schema is in `packages/db/schema.sql`.
 
 Optional seed data is in `packages/db/seed.sql`.
 
-The current app does not require a live PostgreSQL connection because Phase 1 uses mock-backed scanner data.
+The current app does not require a live PostgreSQL connection. When the database is available, the API uses it for watchlist and journal data. Scanner market data is still fixture-backed at this stage.
 
 ## What Works Today
 
 - dashboard loads ranked trade ideas from the API
 - setup detection runs for the five supplied user-defined setups
+- watchlist changes can persist to a local PostgreSQL instance when configured
 - stay-in-cash logic is surfaced in the UI
 - catalysts and event risk are shown
 - trade simulation returns sizing and risk/reward preview

@@ -10,7 +10,9 @@
     "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @stratifyx/api\" \"npm run dev -w @stratifyx/web\"",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "db:migrate": "powershell -NoProfile -Command \"Write-Host 'Apply packages/db/schema.sql to PostgreSQL, then optionally run packages/db/seed.sql.'\""
+    "db:init": "npm run db:init -w @stratifyx/api",
+    "db:seed": "npm run db:seed -w @stratifyx/api",
+    "db:migrate": "npm run db:init"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
